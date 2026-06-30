@@ -3,7 +3,6 @@
 #  Primary targets:
 #    all           - the default target; synonym for 'coq'
 #    coq           - builds all .vo files
-#    doc           - synonym for 'documentation'
 #    install       - copy to coq library location
 #    clean         - removes generated files
 #
@@ -11,10 +10,8 @@
 
 COQC = coqc
 COQDEP = coqdep
-COQDOC = coqdoc
 
 MODULES	:= bubble_sort
-TEX	:= $(MODULES:%=latex/%.v.tex)
 
 ## Library name used for the imports in Coq
 
@@ -26,12 +23,12 @@ COQMKFILENAME=bubblesort_make.mk
 
 ############################################################################
 
-.PHONY: all clean coq doc force
+.PHONY: all clean coq install force
 .SUFFIXES: .v .vo .v.d .v.glob
 
 all: coq
 
-coq: $(COQMKFILENAME) 
+coq: $(COQMKFILENAME)
 	@$(MAKE) -f $(COQMKFILENAME) -C src
 
 %.mk : Makefile _%
@@ -46,19 +43,5 @@ install: all
 clean:
 	@if [ -f src/$(COQMKFILENAME) ]; then $(MAKE) -C src -f $(COQMKFILENAME) clean; fi
 	rm -f src/$(COQMKFILENAME) src/_CoqProject src/*.mk.conf
-	rm -f latex/*.aux latex/*.log latex/*.out latex/*.bbl latex/*.blg latex/*.toc latex/*.v.tex latex/*.pag
 
 force:
-
-$(TEX): force
-	$(COQDOC) --gallina --interpolate --latex --body-only -s \
-			$(patsubst %.v.tex,src/%.v,$(notdir $@)) -o $@
-
-doc: latex/relatorio.pdf $(TEX)
-
-latex/relatorio.pdf: latex/relatorio.tex $(TEX) 
-	cd latex ; pdflatex relatorio ; pdflatex relatorio ; pdflatex relatorio
-
-pdf:
-	evince latex/relatorio.pdf&
-
